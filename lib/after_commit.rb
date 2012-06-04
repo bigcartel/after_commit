@@ -63,7 +63,9 @@ module AfterCommit
   end
   
   def self.add_to_collection(collection, connection, record)
-    Thread.current[collection][connection.unique_transaction_key] << record
+    current_collection = Thread.current[collection][connection.unique_transaction_key]
+    #Only add to the collection if this specific object isn't already into the collection, fixes double create issue
+    current_collection << record unless current_collection.any?{|existing_record| existing_record.object_id == record.object_id}
   end
   
   def self.collection(collection, connection)
